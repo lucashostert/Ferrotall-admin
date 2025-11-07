@@ -66,16 +66,41 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
+  // Aguardar o auth estar pronto se ainda estiver carregando
+  if (authStore.loading) {
+    console.log('🔄 Aguardando auth inicializar...')
+    await new Promise(resolve => {
+      const checkLoading = setInterval(() => {
+        if (!authStore.loading) {
+          clearInterval(checkLoading)
+          resolve()
+        }
+      }, 50)
+    })
+  }
+  
+  console.log('🔍 Navigation Guard:', {
+    to: to.path,
+    user: !!authStore.user,
+    userProfile: authStore.userProfile?.tipo,
+    requiresAuth: to.meta.requiresAuth,
+    requiresAdmin: to.meta.requiresAdmin
+  })
+  
   if (to.meta.requiresAuth && !authStore.user) {
+    console.log('❌ Redirecionando para /login - Não autenticado')
     next('/login')
   } else if (to.meta.requiresGuest && authStore.user) {
+    console.log('✅ Redirecionando para / - Usuário já logado')
     next('/')
   } else if (to.meta.requiresAdmin && authStore.userProfile?.tipo !== 'admin') {
+    console.log('❌ Redirecionando para /login - Não é admin')
     next('/login')
   } else {
+    console.log('✅ Permitindo navegação')
     next()
   }
 })

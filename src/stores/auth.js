@@ -16,15 +16,20 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(true)
 
   const initAuth = () => {
-    onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        user.value = firebaseUser
-        await loadUserProfile(firebaseUser.uid)
-      } else {
-        user.value = null
-        userProfile.value = null
-      }
-      loading.value = false
+    loading.value = true
+    return new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          user.value = firebaseUser
+          await loadUserProfile(firebaseUser.uid)
+        } else {
+          user.value = null
+          userProfile.value = null
+        }
+        loading.value = false
+        unsubscribe()
+        resolve()
+      })
     })
   }
 
