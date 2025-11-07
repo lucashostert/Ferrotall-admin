@@ -73,8 +73,8 @@ router.beforeEach((to, from, next) => {
     next('/login')
   } else if (to.meta.requiresGuest && authStore.user) {
     next('/')
-  } else if (to.meta.requiresAdmin && authStore.user?.tipo !== 'admin') {
-    next('/')
+  } else if (to.meta.requiresAdmin && authStore.userProfile?.tipo !== 'admin') {
+    next('/login')
   } else {
     next()
   }

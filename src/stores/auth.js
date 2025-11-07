@@ -42,24 +42,38 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      console.log('✅ Autenticação bem-sucedida. UID:', userCredential.user.uid)
+      
       await loadUserProfile(userCredential.user.uid)
+      console.log('📄 Perfil carregado:', userProfile.value)
       
       // Verificar se é admin
-      if (userProfile.value?.tipo !== 'admin') {
+      if (!userProfile.value) {
         await logout()
-        throw new Error('Acesso negado. Apenas administradores podem acessar este painel.')
+        throw new Error('Perfil de usuário não encontrado no Firestore. Verifique se o Document ID é igual ao UID do Authentication.')
       }
       
+      if (userProfile.value.tipo !== 'admin') {
+        await logout()
+        throw new Error(`Acesso negado. Tipo de usuário: "${userProfile.value.tipo}". Apenas administradores podem acessar este painel.`)
+      }
+      
+      console.log('✅ Usuário admin verificado')
+      
       // Registrar usuário no OneSignal
-      if (window.OneSignalDeferred) {
-        window.OneSignalDeferred.push(async function(OneSignal) {
-          await OneSignal.login(userCredential.user.uid)
-        })
+      try {
+        if (window.OneSignalDeferred) {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.login(userCredential.user.uid)
+          })
+        }
+      } catch (error) {
+        console.warn('⚠️ Erro ao registrar no OneSignal:', error)
       }
       
       router.push('/')
     } catch (error) {
-      console.error('Erro no login:', error)
+      console.error('❌ Erro no login:', error)
       throw error
     }
   }
