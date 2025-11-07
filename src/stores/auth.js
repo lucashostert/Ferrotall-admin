@@ -49,6 +49,9 @@ export const useAuthStore = defineStore('auth', () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       console.log('✅ Autenticação bem-sucedida. UID:', userCredential.user.uid)
       
+      // IMPORTANTE: Setar o user antes de carregar o perfil
+      user.value = userCredential.user
+      
       await loadUserProfile(userCredential.user.uid)
       console.log('📄 Perfil carregado:', userProfile.value)
       
@@ -64,6 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
       
       console.log('✅ Usuário admin verificado')
+      console.log('👤 User setado:', !!user.value)
       
       // Registrar usuário no OneSignal
       try {
