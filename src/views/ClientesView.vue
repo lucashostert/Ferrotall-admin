@@ -55,9 +55,9 @@
               <td class="py-3 px-4 text-center">
                 <span 
                   class="px-3 py-1 rounded-full text-xs font-medium"
-                  :class="cliente.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                  :class="cliente.ativo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
                 >
-                  {{ cliente.active ? 'Ativo' : 'Inativo' }}
+                  {{ cliente.ativo ? 'Ativo' : 'Inativo' }}
                 </span>
               </td>
               <td class="py-3 px-4">
@@ -255,9 +255,9 @@ const saveCliente = async () => {
 }
 
 const toggleStatus = async (cliente) => {
-  const action = cliente.active ? 'desativar' : 'ativar'
+  const action = cliente.ativo ? 'desativar' : 'ativar'
   if (confirm(`Deseja realmente ${action} este cliente?`)) {
-    await clientesStore.toggleClienteStatus(cliente.id, !cliente.active)
+    await clientesStore.toggleClienteStatus(cliente.id, !cliente.ativo)
   }
 }
 

@@ -6,6 +6,7 @@ import {
   getDocs, 
   getDoc, 
   addDoc, 
+  setDoc,
   updateDoc, 
   query, 
   where,
@@ -64,20 +65,20 @@ export const useClientesStore = defineStore('clientes', () => {
         clienteData.senha
       )
 
-      // Criar documento no Firestore
+      // Criar documento no Firestore (setDoc para criar novo documento)
       const userDoc = {
-        uid: userCredential.user.uid,
         email: clienteData.email,
         nome: clienteData.nome,
         tipo: 'cliente',
         cpfCnpj: clienteData.cpfCnpj || '',
         endereco: clienteData.endereco || '',
         telefone: clienteData.telefone || '',
-        createdAt: Timestamp.now(),
-        active: true
+        ativo: true,
+        criadoEm: Timestamp.now()
       }
 
-      await updateDoc(doc(db, 'users', userCredential.user.uid), userDoc)
+      // Usar setDoc ao invés de updateDoc para criar o documento
+      await setDoc(doc(db, 'users', userCredential.user.uid), userDoc)
       
       await fetchClientes()
       return userCredential.user.uid
@@ -95,7 +96,7 @@ export const useClientesStore = defineStore('clientes', () => {
       const docRef = doc(db, 'users', id)
       await updateDoc(docRef, {
         ...clienteData,
-        updatedAt: Timestamp.now()
+        atualizadoEm: Timestamp.now()
       })
       await fetchClientes()
     } catch (error) {
@@ -106,10 +107,10 @@ export const useClientesStore = defineStore('clientes', () => {
     }
   }
 
-  const toggleClienteStatus = async (id, active) => {
+  const toggleClienteStatus = async (id, ativo) => {
     try {
       const docRef = doc(db, 'users', id)
-      await updateDoc(docRef, { active, updatedAt: Timestamp.now() })
+      await updateDoc(docRef, { ativo, atualizadoEm: Timestamp.now() })
       await fetchClientes()
     } catch (error) {
       console.error('Erro ao atualizar status do cliente:', error)
